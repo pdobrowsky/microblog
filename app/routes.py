@@ -2,7 +2,7 @@ from flask import render_template, flash, redirect, request, url_for
 from flask_login import login_user, current_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, EmptyForm
 from app.models import User, Post
 from app.emails import send_password_reset_email
 from datetime import datetime
@@ -89,7 +89,8 @@ def user(username):
     user = User.query.filter_by(username=username).first_or_404()
     posts = user.posts.order_by(Post.timestamp.desc())
 
-    return render_template('user.html', user=user, posts=posts)
+    form= EmptyForm()
+    return render_template('user.html', user=user, posts=posts, form=form)
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
@@ -110,9 +111,10 @@ def edit_profile():
 
     return render_template('edit_profile.html', title='Edit Profile', form=form)
 
-@app.route('/follow/<username>')
+@app.route('/follow/<username>', methods=['POST'])
 @login_required
 def follow(username):
+    form= EmptyForm()
     user = User.query.filter_by(username=username).first()
 
     if user is None:
@@ -129,9 +131,10 @@ def follow(username):
 
     return redirect(url_for('user', username=username))
 
-@app.route('/unfollow/<username>')
+@app.route('/unfollow/<username>', methods=['POST'])
 @login_required
 def unfollow(username):
+    form= EmptyForm()
     user = User.query.filter_by(username=username).first()
 
     if user is None:
